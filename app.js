@@ -15,4 +15,4 @@ mybot.on("message", function(message){
 
 });
 
-mybot.login("danielhtatiyama@gmail.com", "afferson");
+mybot.login("danielhtatiyama@gmail.com", "testeblackriverbot");
