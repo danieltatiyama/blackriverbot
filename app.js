@@ -1,7 +1,12 @@
 var Discord = require("discord.js");
-var Moment = require("moment.js");
+
+var moment = require('moment');
+
 var mybot = new Discord.Client();
- 
+var uptimesince = moment().format("DD/MM/YYYY - HH:mm:ss");
+var uptimefor = moment().startOf('hour', uptimesince).fromNow();
+
+
 mybot.on("message", function(message){
 	switch(message.content){
 		case "ping":
@@ -10,8 +15,9 @@ mybot.on("message", function(message){
 		case "$Logout":
 			mybot.logout()
 		case "uptime":
-			var uptime = mybot.uptime
-			mybot.sendMessage(message.channel, "I've been functioning for " + uptime );
+			mybot.sendMessage(message.channel, "I've been functioning since " + uptimesince );
+			var uptimefor = moment().startOf('minutes', uptimesince).fromNow();
+			mybot.sendMessage(message.channel, "Which means I've been running ok for " + uptimefor );
 		default:
 			break;
 	}
