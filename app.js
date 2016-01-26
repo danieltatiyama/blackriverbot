@@ -17,7 +17,9 @@ mybot.on("message", function(message){
 		case "uptime":
 			mybot.sendMessage(message.channel, "I've been functioning since " + uptimesince );
 			var uptimefor = moment().startOf('minutes', uptimesince).fromNow();
-			mybot.sendMessage(message.channel, "Which means I've been running ok for " + uptimefor );
+			setTimeout(function() {
+			    mybot.sendMessage(message.channel, "Which means I've been running ok for " + uptimefor );
+			}, 1000);			
 		default:
 			break;
 	}
