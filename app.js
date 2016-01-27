@@ -6,19 +6,26 @@ var uptimesince = moment().format("DD/MM/YYYY - HH:mm:ss");
 
 mybot.on("message", function(message){
 	switch(message.content){
-		case "ping":
+		case "$ping":
 		mybot.reply(message, "pong");
 		mongo.insertMessage(message);
 		break;
-		case "$Logout":
+		case "$logout":
 		mybot.logout()
-		case "uptime":
+		case "$uptime":
 		mybot.sendMessage(message.channel, "I've been functioning since " + uptimesince );
 		var uptimefor = moment().startOf('minutes', uptimesince).fromNow();
 		setTimeout(function() {
 			mybot.sendMessage(message.channel, "In other words, I've been on since a " + uptimefor );
-		}, 1000);			
+		}, 1000);	
+		break;
 		default:
+		if(message.content.indexOf("$search") > -1) {
+			mongo.searchMessages(message, mybot);
+		}
+		if(message.content.indexOf("recordmessage") > -1){
+			mongo.recordMessage(message, mybot);
+		}
 		break;
 	}
 });
