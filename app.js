@@ -1,35 +1,14 @@
 var Discord = require("discord.js");
-
 var moment = require('moment');
-
-var mongodb = require('mongodb');
-var uri = 'mongodb://blackriverbot:blackriverbot@ds059682.mongolab.com:59682/blackriverbotdb';
-
-
+var mongo = require('./mongodb'); // Arquivo Customizado
 var mybot = new Discord.Client();
 var uptimesince = moment().format("DD/MM/YYYY - HH:mm:ss");
-
-
 
 mybot.on("message", function(message){
 	switch(message.content){
 		case "ping":
 		mybot.reply(message, "pong");
-		mongodb.MongoClient.connect(uri, function(err, db){
-			if (err) {throw err};
-			var messages = db.collection('messages');
-			var insertMessage = [
-			{
-				id:      message.id,
-				content: message.content,
-			}
-			];
-			console.log(insertMessage);
-			messages.insert(insertMessage, function(err, result){
-				if(err) throw err;
-				console.log(result);
-			});
-		});
+		mongo.insertMessage(message);
 		break;
 		case "$Logout":
 		mybot.logout()
