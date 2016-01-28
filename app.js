@@ -1,7 +1,7 @@
 var Discord = require("discord.js");
+var mybot = new Discord.Client();
 var moment = require('moment');
 var mongo = require('./mongodb'); // Arquivo Customizado
-var mybot = new Discord.Client();
 var uptimesince = moment().format("DD/MM/YYYY - HH:mm:ss");
 
 mybot.on("message", function(message){
@@ -20,7 +20,7 @@ mybot.on("message", function(message){
 		}, 1000);	
 		break;
 		default:
-		if(message.content.indexOf("$search") > -1) {
+		if(message.content.indexOf("$search") > -1 && message.author.username != mybot.user.username) {
 			mongo.searchMessages(message, mybot);
 		}
 		if(message.content.indexOf("recordmessage") > -1){
@@ -39,3 +39,5 @@ mybot.on("ready", function () {
 });
 
 mybot.login("danielhtatiyama@gmail.com", "testeblackriverbot");
+
+//

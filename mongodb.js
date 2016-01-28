@@ -3,6 +3,7 @@
 
 var mongodb = require('mongodb');
 var uri = 'mongodb://blackriverbot:blackriverbot@ds059682.mongolab.com:59682/blackriverbotdb';
+var underscore = require("underscore");
 
 // Initialize connection once
 mongodb.MongoClient.connect(uri, function(err, database) {
@@ -29,36 +30,57 @@ module.exports = {
 				if(err) throw err;
 			});
 	},
-	searchMessages: function (message, bot) {		
+	/*
+		Função estava utilizando as mensagens do banco. Como o bot já tem no cache as mensagens do canal, não é necessário essa função.
+	*/
+	// searchMessages: function (message, bot) {
+	// 	var command = message.content.toLowerCase().split(' ')[0].substring(1);
+	// 	var searchmsg = message.content.substring(command.length + 2);
+
+	// 	console.log("A search has been prompted. Search term: " + searchmsg);
+	// 	console.log("Requestant: " + message.author.username);
+
+	// 	messages.find(
+	// 		{"content": new RegExp(searchmsg, 'i')}).toArray(function(err, messages){
+	// 			if(err) throw err;
+	// 			switch(true){
+	// 				case (messages.length == 0):
+	// 				bot.sendMessage(message.channel, "The search got no results.");
+	// 				break;
+	// 				case (messages.length == 1):
+	// 				bot.sendMessage(message.channel, "Listing the only message containing the informed text:");
+	// 				bot.sendMessage(message.channel, messages[0].content);
+	// 				break;
+	// 				case (messages.length <= 10):
+	// 				bot.sendMessage(message.channel, "Listing " + messages.length + " messages containing the informed text:");
+	// 				setTimeout(function() {
+	// 					messages.forEach(function (msg) {
+	// 						bot.sendMessage(message.channel, msg.content);
+	// 					});
+	// 				}, 100);	
+	// 				break;					
+	// 				default:
+	// 				bot.sendMessage(message.channel, "Over 10 messages were found, so they won't be displayed. Try be a bit more specific with the text, or you can add more parameters to the search such as the user who sent the message. For more help type !help search.");
+	// 			}			
+	// 		});
+	// 		return;
+	// },
+	searchMessages: function (message, bot) {
 		var command = message.content.toLowerCase().split(' ')[0].substring(1);
-		var suffix = message.content.substring(command.length + 2);
+		var searchmsg = message.content.substring(command.length + 2).split('/')[0].trim();
+		var users = message.mentions;
 
-		console.log("A search has been prompted. Search term: " + suffix);
-		console.log("Requestant: " + message.author.username);
+		if (users.length > 0){
 
-		messages.find({"content": new RegExp(suffix, 'i') }).toArray(function(err, messages){
-			if(err) throw err;
-			switch(true){
-				case (messages.length == 0):
-				bot.sendMessage(message.channel, "The search got no results.");
-				break;
-				case (messages.length == 1):
-				bot.sendMessage(message.channel, "Listing the only message containing the informed text:");
-				bot.sendMessage(message.channel, messages[0].content);
-				break;
-				case (messages.length <= 10):
-				bot.sendMessage(message.channel, "Listing " + messages.length + " messages containing the informed text:");
-				setTimeout(function() {
-					messages.forEach(function (msg) {
-						bot.sendMessage(message.channel, msg.content);
-					});
-				}, 100);	
-				break;					
-				default:
-				bot.sendMessage(message.channel, "Over 10 messages were found, so they won't be displayed. Try be a bit more specific with the text, or you can add more parameters to the search such as the user who sent the message. For more help type !help search.");
-			}			
-		});
-		return;
+		}else{
+			var channelmessages;
+			bot.getChannelLogs(message.channel, 10, function(error, chnmsgs){
+				channelmessages = chnmsgs;
+				var msgs = underscore._.filter(channelmessages, function(returnmsg){ return returnmsg.content.indexOf(searchmsg)>-1 &&
+																							returnmsg.content.indexOf("$") != 0 });
+				checkMsg(message, msgs, bot);
+			});
+		}
 	},
 	recordMessage: function(message, bot){		
 		var insertMessage = [
@@ -85,3 +107,26 @@ module.exports = {
 
 	}
 };
+
+function checkMsg(message, msgs, bot){
+	console.log("It's we that fly");
+	console.log(message);
+	console.log(msgs);
+	switch(true){
+		case (msgs.length == 0):
+		bot.sendMessage(message.channel, "The search got no results.");
+		break;
+		case (msgs.length == 1):
+		bot.sendMessage(message.channel, "Listing the only message containing the informed text:\n" + msgs[0].content);
+		break;
+		case (msgs.length <= 10):
+		bot.sendMessage(message.channel, "Listing " + msgs.length + " messages containing the informed text:", function(error, msg){
+			msgs.forEach(function (msg) {
+				bot.sendMessage(message.channel, msg.content);
+			});
+		});
+		break;					
+		default:
+		bot.sendMessage(message.channel, "Over 10 messages were found, so they won't be displayed. Try be a bit more specific with the text, or you can add more parameters to the search such as the user who sent the message. For more help type !help search.");
+	}
+}
